@@ -57,6 +57,9 @@ public class Mongo2Els {
     @Option(name = "-t", usage = "Elasticsearch document type (by default = collection name)")
     private String doctype = null;
 
+    @Option(name = "-b", usage = "Elasticsearch bulk request size")
+    private int bulkSize = BULK_SIZE;
+
     private MongoClient mongoClient;
 
     private Jongo jongo;
@@ -140,11 +143,11 @@ public class Mongo2Els {
             doc = cursor.next();
             id = doc.remove("_id").toString();
             bulkRequest.add(elsClient.prepareIndex(index, doctype, id).setSource(doc));
-            if (count % BULK_SIZE == 0 || !cursor.hasNext()) {
+            if (count % bulkSize == 0 || !cursor.hasNext()) {
                 LOGGER.info("Indexing {} docs...", count);
                 bulkResponse = bulkRequest.get();
                 if (bulkResponse.hasFailures()) {
-                    System.err.println("ERROR : problems occur with the bulk request: " + bulkResponse.buildFailureMessage());
+                    LOGGER.error("ERROR : problems occur with the bulk request: {}", bulkResponse.buildFailureMessage());
                 }
                 LOGGER.info("Current total : {}", total);
                 count = 0;
@@ -164,6 +167,7 @@ public class Mongo2Els {
                 "  MongoDB projection='" + projection + "'\n" +
                 "  Elasticsearch url='" + elsUrl + "'\n" +
                 "  Elasticsearch index='" + index + "'\n" +
-                "  Elasticsearch doc type='" + doctype + "'\n";
+                "  Elasticsearch doc type='" + doctype + "'\n" +
+                "  Elasticsearch bulk size='" + bulkSize + "'\n";
     }
 }
