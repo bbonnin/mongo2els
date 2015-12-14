@@ -48,7 +48,8 @@ Run with arguments:
 
 ```bash
 
-java -jar mongo2els-jar-with-dependencies.jar -m localhost:27100 -e localhost:10300 -d mydb -c mycollection -p "{'fileName':1}" \
+java -jar mongo2els-jar-with-dependencies.jar -m localhost:27100 -e localhost:10300 -d mydb \
+                                              -c mycollection -p "{'fileName':1}" \
                                               -i myindex -t mytype -q "{'path':'/etc'}" -b 100
 
 2015-12-13 12:32:46.531 [main] INFO  io.millesabords.mongo2els.Mongo2Els - Config: Mongo2Els:
