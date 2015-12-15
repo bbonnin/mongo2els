@@ -129,19 +129,20 @@ public class Mongo2Els {
      * It uses a bulk indexation.
      */
     private void transferData() {
-        final BulkRequestBuilder bulkRequest = elsClient.prepareBulk();
         final MongoCollection collection = jongo.getCollection(collectionName);
         final MongoCursor<Map> cursor = collection.find(query).projection(projection).as(Map.class);
         Map doc;
         BulkResponse bulkResponse;
         String id;
         int count = 0;
+        BulkRequestBuilder bulkRequest = elsClient.prepareBulk();
 
         while (cursor.hasNext()) {
             total++;
             count++;
             doc = cursor.next();
             id = doc.remove("_id").toString();
+
             bulkRequest.add(elsClient.prepareIndex(index, doctype, id).setSource(doc));
             if (count % bulkSize == 0 || !cursor.hasNext()) {
                 LOGGER.info("Indexing {} docs...", count);
@@ -151,6 +152,7 @@ public class Mongo2Els {
                 }
                 LOGGER.info("Current total : {}", total);
                 count = 0;
+                bulkRequest = elsClient.prepareBulk();
             }
 
         }
