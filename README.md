@@ -41,6 +41,7 @@ elasticsearch.port         | 9300                       | Transport port (**NOT 
 elasticsearch.index        | (same as mongo.db)         | Index name
 elasticsearch.type         | (same as mongo.collection) | Document type name
 elasticsearch.bulk.size    | 1000                       | Size of the bulk request (bulk mode only)
+elasticsearch.bulk.threads | 1                          | Number of threads doing the bulk indexing
 elasticsearch.use_mongo_id | true                       | The MongoDB _id will be used as identifier in Elasticsearch
 
 
@@ -62,5 +63,5 @@ java -jar mongo2els-jar-with-dependencies.jar -m realtime -c mongo2els.propertie
 
 This tool has been tested with:
 * Elasticsearch 2.1.0
-* MongoDB 3.0.7
+* MongoDB 3.0.7, 3.2.0
 

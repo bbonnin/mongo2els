@@ -9,3 +9,6 @@ buildNumber.properties
 *.iml
 .idea/
 *.log
+.classpath
+.project
+.settings/

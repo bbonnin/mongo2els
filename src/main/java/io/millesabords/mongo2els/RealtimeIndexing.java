@@ -8,13 +8,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Streaming mode of Mongo2Els.
- * 
+ *
  * @author Bruno Bonnin
  */
 public class RealtimeIndexing implements OplogListener {
 
     private static Logger LOGGER = LoggerFactory.getLogger(RealtimeIndexing.class);
-    
+
     private final Client elsClient;
 
     private final Config cfg = Config.get();
@@ -24,7 +24,7 @@ public class RealtimeIndexing implements OplogListener {
     }
 
     @Override
-    public void onOplog(Document oplog) {
+    public void onOplog(final Document oplog) {
         //TODO : use of the projection. For the moment, index the whole document
         final String elsIndex = cfg.get(Config.ELS_INDEX);
         final String elsType = cfg.get(Config.ELS_TYPE);
@@ -49,7 +49,7 @@ public class RealtimeIndexing implements OplogListener {
                     .setSource(obj)
                     .get();
             }
-            catch (ElasticsearchException e) {
+            catch (final ElasticsearchException e) {
                 LOGGER.error("Index doc=" + obj, e);
             }
         }
@@ -66,7 +66,7 @@ public class RealtimeIndexing implements OplogListener {
                     LOGGER.warn("No more 'delete by query' in Elasticsearch");
                 }
             }
-            catch (ElasticsearchException e) {
+            catch (final ElasticsearchException e) {
                 LOGGER.error("Index doc=" + obj, e);
             }
 

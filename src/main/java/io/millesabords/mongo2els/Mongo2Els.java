@@ -1,7 +1,12 @@
 package io.millesabords.mongo2els;
 
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
@@ -13,12 +18,8 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.util.Date;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 
 /**
  * Simple tool for exporting data from MongoDB to Elasticsearch.
@@ -28,29 +29,29 @@ import java.util.concurrent.Executors;
 public class Mongo2Els {
 
     private static Logger LOGGER = LoggerFactory.getLogger(Mongo2Els.class);
-    
+
     @Option(name = "-m", usage = "Processing mode", required = true, metaVar = "<bulk | realtime>")
     private String mode;
-    
+
     @Option(name = "-c", usage = "Configuration file", required = true, metaVar = "<file name>")
     private String configFileName;
-    
+
     private MongoClient mongoClient;
 
     private Jongo jongo;
 
     private Client elsClient;
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         new Mongo2Els().doMain(args);
     }
 
-    private void doMain(String[] args) {
+    private void doMain(final String[] args) {
         final CmdLineParser parser = new CmdLineParser(this);
 
         try {
             parser.parseArgument(args);
-            
+
             final Config cfg = Config.get();
             cfg.load(new FileInputStream(configFileName));
 
@@ -62,7 +63,7 @@ public class Mongo2Els {
             LOGGER.info("Start : {}", new Date());
 
             if ("bulk".equalsIgnoreCase(mode)) {
-                new BulkIndexing(jongo, elsClient).indexData();
+                new BulkIndexing(jongo, elsClient, cfg.getInt(Config.ELS_BULK_THREADS)).indexData();
             }
             else if ("realtime".equalsIgnoreCase(mode)) {
                 final RealtimeIndexing indexing = new RealtimeIndexing(elsClient);
@@ -76,16 +77,16 @@ public class Mongo2Els {
                 parser.printUsage(System.err);
             }
         }
-        catch (CmdLineException e) {
+        catch (final CmdLineException e) {
             System.err.println("Bad argument");
             parser.printUsage(System.err);
         }
-        catch (Exception e) {
+        catch (final Exception e) {
             LOGGER.error("Problem during processing", e);
         }
 
         LOGGER.info("End : {}", new Date());
-        
+
     }
 
     @SuppressWarnings("deprecation")
@@ -101,7 +102,7 @@ public class Mongo2Els {
         final Config cfg = Config.get();
         final String host = cfg.get(Config.ELS_HOST);
         final int port = cfg.getInt(Config.ELS_PORT);
-        
+
         final Settings settings = Settings.settingsBuilder()
             .put("client.transport.ignore_cluster_name", true).build();
 
@@ -109,6 +110,6 @@ public class Mongo2Els {
             .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(host), port));
     }
 
-    
-    
+
+
 }

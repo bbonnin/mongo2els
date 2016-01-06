@@ -1,6 +1,9 @@
 package io.millesabords.mongo2els;
 
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -13,20 +16,23 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Bulk indexing of data.
- * 
+ *
  * @author Bruno Bonnin
  */
 public class BulkIndexing {
-    
+
     private static Logger LOGGER = LoggerFactory.getLogger(BulkIndexing.class);
-    
+
+    private final ExecutorService exec;
+
     private final Jongo jongo;
 
     private final Client elsClient;
-    
-    public BulkIndexing(Jongo jongo, Client elsClient) {
+
+    public BulkIndexing(final Jongo jongo, final Client elsClient, final int nbThreads) {
         this.jongo = jongo;
         this.elsClient = elsClient;
+        this.exec = Executors.newFixedThreadPool(nbThreads);
     }
 
     /**
@@ -35,7 +41,7 @@ public class BulkIndexing {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void indexData() {
         final Config cfg = Config.get();
-        
+
         final MongoCollection collection = jongo.getCollection(cfg.get(Config.MONGO_COLLECTION));
         final MongoCursor<Map> cursor = collection
             .find(cfg.get(Config.MONGO_QUERY)).projection(cfg.get(Config.MONGO_PROJECTION)).as(Map.class);
@@ -44,7 +50,7 @@ public class BulkIndexing {
         final int bulkSize = cfg.getInt(Config.ELS_BULK_SIZE);
 
         Map doc;
-        BulkResponse bulkResponse;
+
         String id;
         int total = 0;
         int count = 0;
@@ -57,17 +63,37 @@ public class BulkIndexing {
             id = doc.remove("_id").toString();
             bulkRequest.add(elsClient.prepareIndex(elsIndex, elsType, id).setSource(doc));
             if (count % bulkSize == 0 || !cursor.hasNext()) {
-                LOGGER.info("Indexing {} docs...", count);
-                bulkResponse = bulkRequest.get();
-                if (bulkResponse.hasFailures()) {
-                    LOGGER.error("ERROR : problems occur with the bulk request: {}", bulkResponse.buildFailureMessage());
-                }
                 LOGGER.info("Current total : {}", total);
+                exec.submit(new BulkIndexingTask(bulkRequest, count));
                 count = 0;
                 bulkRequest = elsClient.prepareBulk();
             }
         }
-        
+
+        exec.shutdown();
+
         LOGGER.info("Total of indexed docs : {}", total);
+    }
+
+    class BulkIndexingTask implements Callable<Void> {
+
+        private final BulkRequestBuilder bulkRequest;
+        private final int nbDocs;
+
+        public BulkIndexingTask(final BulkRequestBuilder bulkRequest, final int nbDocs) {
+            this.bulkRequest = bulkRequest;
+            this.nbDocs = nbDocs;
+        }
+
+        @Override
+        public Void call() throws Exception {
+            LOGGER.info("Indexing {} docs...", nbDocs);
+            final BulkResponse bulkResponse = bulkRequest.get();
+            if (bulkResponse.hasFailures()) {
+                LOGGER.error("ERROR : problems occur with the bulk request: {}", bulkResponse.buildFailureMessage());
+            }
+            return null;
+        }
+
     }
 }
