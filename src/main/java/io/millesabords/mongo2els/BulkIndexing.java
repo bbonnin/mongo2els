@@ -11,8 +11,11 @@ import org.elasticsearch.client.Client;
 import org.jongo.Jongo;
 import org.jongo.MongoCollection;
 import org.jongo.MongoCursor;
+import org.jongo.QueryModifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.mongodb.DBCursor;
 
 /**
  * Bulk indexing of data.
@@ -44,7 +47,14 @@ public class BulkIndexing {
 
         final MongoCollection collection = jongo.getCollection(cfg.get(Config.MONGO_COLLECTION));
         final MongoCursor<Map> cursor = collection
-            .find(cfg.get(Config.MONGO_QUERY)).projection(cfg.get(Config.MONGO_PROJECTION)).as(Map.class);
+                .find(cfg.get(Config.MONGO_QUERY)).projection(cfg.get(Config.MONGO_PROJECTION))
+                .with(new QueryModifier() {
+                    @Override
+                    public void modify(DBCursor cursor) {
+                        cursor.batchSize(cfg.getInt(Config.MONGO_BATCH_SIZE));
+                    }
+                })
+                .as(Map.class);
         final String elsIndex = cfg.get(Config.ELS_INDEX);
         final String elsType = cfg.get(Config.ELS_TYPE);
         final int bulkSize = cfg.getInt(Config.ELS_BULK_SIZE);

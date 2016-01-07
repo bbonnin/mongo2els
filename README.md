@@ -36,6 +36,7 @@ mongo.db                   | test                       | Database name
 mongo.collection           | test                       | Collection name
 mongo.query                | {}                         | Query to select data (bulk mode only)
 mongo.projection           | (none)                     | Projection used to select fields that will be indexed (bulk mode only)
+mongo.batch.size           | 20                         | Batch size for the find query
 elasticsearch.host         | localhost                  | Host or IP address
 elasticsearch.port         | 9300                       | Transport port (**NOT HTTP**)
 elasticsearch.index        | (same as mongo.db)         | Index name

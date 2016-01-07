@@ -21,6 +21,7 @@ public class Config extends Properties {
     public static final String MONGO_COLLECTION = "mongo.collection";
     public static final String MONGO_QUERY = "mongo.query";
     public static final String MONGO_PROJECTION = "mongo.projection";
+    public static final String MONGO_BATCH_SIZE = "mongo.batch.size";
 
     public static final String ELS_HOST = "elasticsearch.host";
     public static final String ELS_PORT = "elasticsearch.port";
@@ -40,6 +41,7 @@ public class Config extends Properties {
         put(MONGO_DB, "test");
         put(MONGO_COLLECTION, "test");
         put(MONGO_QUERY, "{}");
+        put(MONGO_BATCH_SIZE, 20);
 
         put(ELS_HOST, "localhost");
         put(ELS_PORT, 9300);
