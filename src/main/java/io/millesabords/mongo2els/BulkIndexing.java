@@ -70,11 +70,12 @@ public class BulkIndexing {
             total++;
             count++;
             doc = cursor.next();
+            id = doc.remove("_id").toString();
             if (cfg.getBoolean(Config.ELS_USE_MONGO_ID)) {
-                id = doc.remove("_id").toString();
                 bulkRequest.add(elsClient.prepareIndex(elsIndex, elsType, id).setSource(doc));
             }
             else {
+                doc.put("_mongo_id", id);
                 bulkRequest.add(elsClient.prepareIndex(elsIndex, elsType).setSource(doc));
             }
             if (count % bulkSize == 0 || !cursor.hasNext()) {
