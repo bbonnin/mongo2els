@@ -37,16 +37,16 @@ public class Config extends Properties {
 
     private Config() {
         put(MONGO_HOST, "localhost");
-        put(MONGO_PORT, 27017);
+        put(MONGO_PORT, "27017");
         put(MONGO_DB, "test");
         put(MONGO_COLLECTION, "test");
         put(MONGO_QUERY, "{}");
-        put(MONGO_BATCH_SIZE, 20);
+        put(MONGO_BATCH_SIZE, "20");
 
         put(ELS_HOST, "localhost");
-        put(ELS_PORT, 9300);
-        put(ELS_BULK_SIZE, 1000);
-        put(ELS_BULK_THREADS, 1);
+        put(ELS_PORT, "9300");
+        put(ELS_BULK_SIZE, "1000");
+        put(ELS_BULK_THREADS, "1");
         put(ELS_USE_MONGO_ID, true);
     }
 
