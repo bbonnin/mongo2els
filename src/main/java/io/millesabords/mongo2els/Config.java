@@ -30,6 +30,7 @@ public class Config extends Properties {
     public static final String ELS_BULK_SIZE = "elasticsearch.bulk.size";
     public static final String ELS_BULK_THREADS = "elasticsearch.bulk.threads";
     public static final String ELS_USE_MONGO_ID = "elasticsearch.use_mongo_id";
+    public static final String ELS_MONGO_ID_NAME = "elasticsearch.mongo_id_name";
 
     public static Config get() {
         return INSTANCE;
@@ -47,7 +48,8 @@ public class Config extends Properties {
         put(ELS_PORT, "9300");
         put(ELS_BULK_SIZE, "1000");
         put(ELS_BULK_THREADS, "1");
-        put(ELS_USE_MONGO_ID, true);
+        put(ELS_USE_MONGO_ID, "true");
+        put(ELS_MONGO_ID_NAME, "_mongo_id");
     }
 
     public String get(final String key) {

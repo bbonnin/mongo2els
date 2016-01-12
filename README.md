@@ -44,6 +44,7 @@ elasticsearch.type         | (same as mongo.collection) | Document type name
 elasticsearch.bulk.size    | 1000                       | Size of the bulk request (bulk mode only)
 elasticsearch.bulk.threads | 1                          | Number of threads doing the bulk indexing
 elasticsearch.use_mongo_id | true                       | The MongoDB _id will be used as identifier in Elasticsearch
+elasticsearch.mongo_id_name| _mongo_id                  | Name of the field containing the id from MongoDB (used if use_mongo_id = false)
 
 
 

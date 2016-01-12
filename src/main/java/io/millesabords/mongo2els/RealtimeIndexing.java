@@ -37,7 +37,7 @@ public class RealtimeIndexing implements OplogListener {
             String id = null;
 
             if (!useMongoId) {
-                obj.put("_mongo_id", obj.remove("_id"));
+                obj.put(cfg.get(Config.ELS_MONGO_ID_NAME), obj.remove("_id"));
             }
             else {
                 id = obj.remove("_id").toString();
